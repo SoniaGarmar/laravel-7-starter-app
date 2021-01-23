@@ -1,0 +1,49 @@
+version: "3" 
+
+networks:
+    laravel:
+
+services:
+    nginx:
+        image: nginx:stable-alpine
+        container_name: nginx-laravel-vue
+        ports:
+            - "8080:80"
+        volumes:
+            - ./src:/var/www
+            - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+        depends_on:
+            - php
+            - mysql
+        networks:
+            - laravel 
+        
+    mysql:
+        image: mysql:5.7
+        container_name: mysql-laravel-vue
+        restart: unless-stopped
+        tty: true
+        ports:
+            - "3376:3306"
+        environment:
+            MYSQL_DATABASE: laravel-vue-test
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_PASSWORD: user
+            MYSQL_USER: user
+            SERVICE_TAGS: dev
+            SERVICE_NAME: mysql
+        networks:
+            - laravel
+
+    php:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: php-laravel-vue
+        volumes:
+            - ./src:/var/www
+        ports:
+            - "9000:9000"
+        networks:
+            - laravel 
+         
